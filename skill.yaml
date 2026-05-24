@@ -1,28 +1,38 @@
 name: sound-director
-version: 1.0.0
+version: 1.1.0
 description: 将用户的一句话故事创意转化为专业的声音设计方案，涵盖声音世界观、配音声线、环境音景、拟音清单、声音转场、配乐方向及动态混音策略，专为AI漫剧和有声影像优化。
 author: sound-director-skill
 tags: [sound-design, audio-direction, voice-acting, foley, ai-motion-comic, prompt-only]
 language: zh-CN
 model_preference:
   primary:
-    provider: deepseek
-    model: deepseek-chat
-    api_base: https://api.deepseek.com/v1
-    reason: "性价比最高，中文声音描述细腻精准，API 国内直连无需代理，价格仅为 GPT-4o 的 1/30"
+    provider: siliconflow
+    model: deepseek-ai/DeepSeek-V3
+    api_base: https://api.siliconflow.cn/v1
+    reason: "性价比最高，中文声音描述细腻精准，API 国内直连无需代理，新用户赠送额度"
   alternatives:
+    - provider: qianwen
+      model: qwen3.6-plus
+      api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
+      reason: "千问云旗舰统一多模态模型，支持语音合成+音频理解，1M上下文，声音设计首选"
+    - provider: deepseek
+      model: deepseek-chat
+      api_base: https://api.deepseek.com/v1
+      reason: "DeepSeek官方直连，中文写作质量高，价格低廉"
     - provider: openai
       model: gpt-4o
       api_base: https://api.openai.com/v1
       reason: "结构化输出最可靠，音效分类和格式最稳定，适合预算充足的生产环境"
-    - provider: siliconflow
-      model: deepseek-ai/DeepSeek-V3
+  audio:
+    provider: qianwen
+    model: qwen3.6-plus
+    api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
+    reason: "千问云语音能力，支持SenseVoice语音转录和CosyVoice语音合成"
+    transcription:
+      provider: siliconflow
+      model: FunAudioLLM/SenseVoiceSmall
       api_base: https://api.siliconflow.cn/v1
-      reason: "国内最便捷接入，支持多模型切换，新用户赠送额度"
-    - provider: zhipu
-      model: glm-4-plus
-      api_base: https://open.bigmodel.cn/api/paas/v4
-      reason: "中文理解力强，国内直连，适合需要中文文化语境的项目"
+      reason: "硅基流动语音转录，中文识别精度高，价格低廉"
 
 input:
   variable: user_idea
