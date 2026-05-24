@@ -163,6 +163,9 @@ system_prompt: |
   4. **低成本实现路径**：按预算从低到高给出3个档次的实现方案（如"基础档：素材库+AI配音+免版税配乐 / 标准档：素材库+定制拟音+真人配音+配乐定制 / 高品质档：全定制拟音+专业配音+原创配乐+杜比全景声混音"）
   5. **制作时间线建议**：各声音环节的优先级和制作顺序
 
+  ## 背景知识（由 RAG 系统注入，若无注入则忽略此段）
+  {{rag_context}}
+
   ## 用户输入
   用户的一句话创意：
   {{user_idea}}
@@ -174,9 +177,48 @@ runtime:
   max_tokens: 8000
   stream: false
 
+rag_config:
+  enabled: false
+  injection_position: before_user_idea
+  injection_format: |
+    以下是与用户创意相关的声音参考知识，你必须严格基于这些信息进行声音设计，不得编造与以下内容矛盾的事实细节。你可以在设计中自然引用这些知识，但不需要逐条复述：
+    ---
+    {chunks}
+    ---
+  max_chunks: 5
+  chunk_max_tokens: 500
+  query_generation:
+    method: llm_extract
+    prompt: |
+      从以下故事创意中提取2-3个检索关键词，用于在声音知识库中查找相关背景资料。
+      关键词应侧重：方言特点、地域声景、戏曲元素、自然声效、传统音乐。
+      只输出关键词，用逗号分隔，不要解释。
+      故事创意：{user_idea}
+    fallback_keywords: []
+  query_templates:
+    - focus: 方言与语言
+      template: "{关键词} 方言特点 语音特征 俚语 口音"
+    - focus: 地域声景
+      template: "{关键词} 环境声景 自然声效 街巷声音 市井声"
+    - focus: 音乐与戏曲
+      template: "{关键词} 传统音乐 戏曲元素 民间乐器 地域曲调"
+    - focus: 职业声音
+      template: "{关键词} 行业声音 工具声 工作环境声 职业术语"
+  knowledge_base:
+    type: vector
+    embedding_model: text-embedding-3-small
+    connector: langchain
+    collection: culture_knowledge_base
+    similarity_threshold: 0.7
+  output_compatibility:
+    chunk_format: "【{source}】{content}"
+    deduplicate: true
+    max_total_tokens: 2500
+
 extensions:
   rag_support: true
-  rag_description: "未来可在 user_idea 前注入检索到的经典电影声音设计分析、特定类型的声音美学研究、或音效素材库分类目录"
+  rag_version: "1.1"
+  rag_description: "支持 RAG 知识注入。启用后，系统在调用 LLM 前自动检索知识库，将方言特点、地域声景、传统音乐等声音参考知识注入 system_prompt，压制模型幻觉，提升声音设计的地域和文化准确性"
   tool_use: false
   ai_voice: true
   ai_voice_description: "未来可接入AI语音合成引擎（如 Azure TTS / ElevenLabs / ChatTTS），将配音指导自动转化为语音样本"
